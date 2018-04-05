@@ -1,0 +1,20 @@
+Group
+-------------
+group list
+group create
+group update
+group delete
+
+Question
+--------------
+Question list filtered by group id
+Question get one by id
+Question update
+Question delete
+
+Answer
+--------------
+Answer list filtered by question id
+Answer create
+Answer update
+Ansser delete

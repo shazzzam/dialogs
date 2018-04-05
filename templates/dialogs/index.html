@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Dialogs Builder</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link rel="stylesheet" href="{% static 'css/materialize.min.css' %}" type="text/css" media="screen" title="no title" charset="utf-8">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css" media="screen" title="no title" charset="utf-8">
+</head>
+<body>
+<div class="navbar-fixed">
+	<!-- <nav> -->
+		<!-- <div class="nav-wrapper"> -->
+			<!-- <a href="#!" class="brand-logo">Logo</a> -->
+			<!-- <ul class="right hide-on-med-and-down"> -->
+				<!-- <li><a href="#">logout</a></li> -->
+			<!-- </ul> -->
+		<!-- </div> -->
+	<!-- </nav> -->
+</div>
+<div class="container">
+    <div class="row">
+        <ul class="col s12 m5 collection group__list">
+            <li class="collection-item">
+
+                <form action="{% url 'api-dialogs:groups-create' %}" method="post" accept-charset="utf-8" class="row group-form">
+                    <input placeholder="Название группы" id="name" name="name" type="text" class="validate col s12 group-name">
+                    {% csrf_token %}
+                </form>
+            </li>
+            {% for group in groups %}
+                <li class="group__item collection-item" data-id="{{ group.id }}">
+                    <a class="group__item-link row" href="#">
+                        <span class="group__item-name col s8">{{ group.name }}</span>
+                        <span class="secondary-content delete" data-id="{{ group.id }}" data-name="{{ group.name }}" data-url="{{ group.delete_link }}">
+                            <i class="material-icons">close</i>
+                        </span>
+                        <span class="secondary-content edit"><i class="material-icons">edit</i></span>
+                    </a>
+                    <form class="group__item-form hidden row" action="{{ group.update_link }}" method="post" accept-charset="utf-8">
+                        {% csrf_token %}
+                        <input placeholder="Название группы" id="name" name="name" type="text" value="{{ group.name }}" class="validate col s12 group-name">
+                    </form>
+                </li>
+            {% endfor %}
+              <!-- Modal Structure -->
+            <div class="group_delete_modal modal">
+                <div class="modal-content">
+                    <h6>Риальне удаить группу вопросов?</h6>
+                    <p></p>
+                </div>
+                <div class="modal-footer">
+                    <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat btn-small red">Ну, да, наверное</a>
+                </div>
+            </div>
+        </ul>
+
+        <div id="modal-question-create" class="question-create modal modal-fixed-footer">
+            <form action="#" method="post" accept-charset="utf-8" class="question-create-form">
+                <div class="modal-content">
+                    {% csrf_token %}
+                    <div class="input-field col s12">
+                      <textarea id="question-text" name="text" class="materialize-textarea"></textarea>
+                      <label for="question-text">Текст вопроса</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Добавить вопрос" class="modal-action modal-close waves-effect waves-green btn-flat btn-small green">
+                </div>
+            </form>
+        </div>
+        <div id="modal-question-edit" class="question-edit-modal modal modal-fullscreen">
+            <div class="modal-content">
+                <form action="#" method="PUT" accept-charset="utf-8" class="question-edit-form">
+                    {% csrf_token %}
+                    <input type="submit" value="Редактировать вопрос" class="waves-effect waves-green btn-flat btn-small green">
+                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat btn-small green">Закрыть</a>
+                      <a class='dropdown-trigger btn btn-flat btn-small green' href='#' data-target='income-dropdown'>Входящие</a>
+                      <ul id='income-dropdown' class='dropdown-content income-dropdown-list'>
+                        <li><a href="#!">one</a></li>
+                      </ul>
+
+                    <div class="input-field col s12">
+                      <textarea id="question-text" name="text" class="materialize-textarea"></textarea>
+                      <!-- <label for="question-text">Текст вопроса</label> -->
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <ul class="col s12 collection ansers__list">
+                    <li class="collection-item">
+                        <form action="#" method="post" accept-charset="utf-8" class="row answer-form">
+                            <input placeholder="Ответ" id="text" name="text" type="text" class="validate col s12 answer-text">
+                            {% csrf_token %}
+                        </form>
+                    </li>
+                    <div class="question-edit-modal-answers">
+                    </div>
+                      <!-- Modal Structure -->
+                    <div class="answer_delete_modal modal">
+                        <div class="modal-content">
+                            <h6>Риальне удаить ответ?</h6>
+                            <p></p>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat btn-small red">Ну, да, наверное</a>
+                        </div>
+                    </div>
+
+                    <div class="answer_append_modal modal">
+                        <div class="modal-content">
+                            <h6>Прикрепить вопрос</h6>
+                            <ul class="collection answers-append-collection">
+                            </ul>
+                        </div>
+                    </div>
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="question_delete_modal modal">
+            <div class="modal-content">
+                <h6>Риальне удаить вопрос?</h6>
+                <p></p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat btn-small red">Ну, да, наверное</a>
+            </div>
+        </div>
+
+        <div class="question_delete_modal2 modal">
+            <div class="modal-content">
+                <h6>Риальне удаить вопрос?</h6>
+                <p></p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat btn-small red">Ну, да, наверное</a>
+            </div>
+        </div>
+
+        <div class="fixed-action-btn">
+          <a class="btn-floating btn-large red modal-trigger" href="#modal-question-create">
+            <i class="large material-icons">mode_edit</i>
+          </a>
+        </div>
+        <div class="col s12 m7 questions__list">
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/jquery.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'js/materialize.min.js' %}" charset="utf-8"></script>
+<script src="{% static 'js/app.js' %}" charset="utf-8"></script>
+</body>
+</html>
