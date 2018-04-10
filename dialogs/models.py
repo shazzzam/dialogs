@@ -1,3 +1,4 @@
+# coding: utf-8
 from django.db import models
 from django.urls import reverse
 
@@ -34,9 +35,48 @@ class Question(models.Model):
 
 
 class Answer(models.Model):
+    HUMANITY_CHOICES = (
+        ('-', 'Человечный'),
+        ('0', 'Нейтральный'),
+        ('+', 'Психопатичный'),
+    )
+    CURIOSITY_CHOICES = (
+        ('-', 'Любопытный'),
+        ('0', 'Нейтральный'),
+        ('+', 'Осторожный'),
+    )
+    TYRANNY_CHOICES = (
+        ('-', 'Властный'),
+        ('0', 'Нейтральный'),
+        ('+', 'Либеральный'),
+    )
+    INDEPENDENCE_CHOICES = (
+        ('-', 'Независимый'),
+        ('0', 'Нейтральный'),
+        ('+', 'Коллективный'),
+    )
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    humanity = models.CharField(
+        max_length=10,
+        choices=HUMANITY_CHOICES,
+        default='0')
+    curiosity = models.CharField(
+        max_length=10,
+        choices=CURIOSITY_CHOICES,
+        default='0'
+    )
+    tyranny = models.CharField(
+        max_length=10,
+        choices=TYRANNY_CHOICES,
+        default='0'
+    )
+    independence = models.CharField(
+        max_length=10,
+        choices=INDEPENDENCE_CHOICES,
+        default='0'
+    )
     question = models.ForeignKey(
         'Question',
         on_delete=models.CASCADE,

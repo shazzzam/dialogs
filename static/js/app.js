@@ -7,6 +7,59 @@ var answer_delete_modal = 0
 var answer_link_modal = 0
 var answer_outcome_modal = 0
 
+create_answer = (answer) => {
+  return `
+  <li class="answer__item collection-item" data-id="${answer['id']}">
+    <a class="answer__item-link row" href="#">
+      <span class="answer__item-name col s8">${answer['text']}</span>
+      <span class="secondary-content delete" data-id="${answer['id']}" data-name="${answer['text']}" data-url="${answer['delete_url']}">
+        <i class="material-icons">close</i>
+      </span>
+      <span class="secondary-content edit"><i class="material-icons">edit</i></span>
+      <span class="secondary-content outcome" data-outcome="${answer['outcome']}"><i class="material-icons">chevron_right</i></span>
+      <span class="secondary-content append" data-outcome="${answer['outcome']}"><i class="material-icons">link</i></span>
+      <div class="row">
+        <div class="input-field col s3">
+          <select data-type="humanity" class="answer__item-selector answer__item-humanity">
+            <option value="-"${answer['humanity']=='-' ? ' selected' : ''}>Человечный</option>
+            <option value="0"${answer['humanity']=='0' ? ' selected' : ''}>Нейтральный</option>
+            <option value="+"${answer['humanity']=='+' ? ' selected' : ''}>Психопатичный</option>
+          </select>
+          <label>Человечность</label>
+        </div>
+        <div class="input-field col s3">
+          <select data-type="curiosity" class="answer__item-selector answer__item-curiosity">
+            <option value="-"${answer['curiosity']=='-' ? ' selected' : ''}>Любопытный</option>
+            <option value="0"${answer['curiosity']=='0' ? ' selected' : ''}>Нейтральный</option>
+            <option value="+"${answer['curiosity']=='+' ? ' selected' : ''}>Осторожный</option>
+          </select>
+          <label>Любопытство</label>
+        </div>
+        <div class="input-field col s3">
+          <select data-type="tyranny" class="answer__item-selector answer__item-tyranny">
+            <option value="-"${answer['tyranny']=='-' ? ' selected' : ''}>Властный</option>
+            <option value="0"${answer['tyranny']=='0' ? ' selected' : ''}>Нейтральный</option>
+            <option value="+"${answer['tyranny']=='+' ? ' selected' : ''}>Либеральный</option>
+          </select>
+          <label>Властность</label>
+        </div>
+        <div class="input-field col s3">
+          <select data-type="independence" class="answer__item-selector answer__item-independence">
+            <option value="-"${answer['independence']=='-' ? ' selected' : ''}>Независимый</option>
+            <option value="0"${answer['independence']=='0' ? ' selected' : ''}>Нейтральный</option>
+            <option value="+"${answer['independence']=='+' ? ' selected' : ''}>Коллективный</option>
+          </select>
+          <label>Неависимость</label>
+        </div>
+      </div>
+  </a>
+  <form class="answer__item-form hidden row" action="${answer['update_url']}" method="put" accept-charset="utf-8">
+      <input placeholder="Название группы" id="name" name="text" type="text" value="${answer['text']}" class="validate col s12 group-name">
+    </form>
+  </li>
+  `
+}
+
 $(".group-form").submit(function( event ) {
   let name = $('.group-name').val()
   event.preventDefault()
@@ -57,6 +110,47 @@ $(document).on('click', '.group__item', function(event) {
       `
     }
     $('.questions__list').html(elems)
+  })
+})
+
+$(document).on('click', '.question-modal-dice', function(event) {
+  event.preventDefault()
+  event.stopPropagation()
+  abc = ['-', '0', '0', '+']
+  data = {
+    text: 'empty',
+    humanity: abc[Math.floor(Math.random() * abc.length)],
+    curiosity: abc[Math.floor(Math.random() * abc.length)],
+    tyranny: abc[Math.floor(Math.random() * abc.length)],
+    independence: abc[Math.floor(Math.random() * abc.length)],
+  }
+  id = question_edit_modal
+  url = '/api/v1/dialogs/answers/' + id + '/create/'
+  $.ajax({
+    url: url,
+    type: 'POST',
+    data: data,
+    success: function(result) {
+      answer = create_answer(result)
+      $('.question-edit-modal-answers').append(answer)
+      $('select').formSelect();
+    }
+  })
+})
+
+$(document).on('change', '.answer__item-selector', function(event) {
+  id = $(this).parent().parent().parent().parent().parent().data('id')
+  text = $(this).parent().parent().parent().parent().find('.answer__item-name').text()
+  value = $(this).val()
+  type = $(this).data('type')
+  data = {
+    [type]: value,
+    text: text,
+  }
+  $.ajax({
+    url: '/api/v1/dialogs/answers/' + id + '/update/',
+    type: 'PUT',
+    data: data
   })
 })
 
@@ -143,24 +237,10 @@ $(document).on('click', '.question__edit', function(event) {
       $('.question-edit-modal').modal('open')
       answers = ''
       for(let one of result['answers']) {
-        answers += `
-        <li class="answer__item collection-item" data-id="${one['id']}">
-          <a class="answer__item-link row" href="#">
-            <span class="answer__item-name col s8">${one['text']}</span>
-            <span class="secondary-content delete" data-id="${one['id']}" data-name="${one['text']}" data-url="${one['delete_url']}">
-              <i class="material-icons">close</i>
-            </span>
-            <span class="secondary-content edit"><i class="material-icons">edit</i></span>
-            <span class="secondary-content outcome" data-outcome="${one['outcome']}"><i class="material-icons">chevron_right</i></span>
-            <span class="secondary-content append" data-outcome="${one['outcome']}"><i class="material-icons">link</i></span>
-        </a>
-        <form class="answer__item-form hidden row" action="${one['update_url']}" method="put" accept-charset="utf-8">
-            <input placeholder="Название группы" id="name" name="text" type="text" value="${one['text']}" class="validate col s12 group-name">
-          </form>
-        </li>
-        `
+        answers += create_answer(one)
       }
       $('.question-edit-modal-answers').html(answers)
+      $('select').formSelect();
       incomes = ''
       for(let one of result['incomes']) {
         incomes += `
@@ -185,32 +265,9 @@ $(document).on('submit', '.answer-form', function(event) {
     type: 'POST',
     data: data,
     success: function(result) {
-      answer = `
-        <li class="answer__item collection-item" data-id="${result['id']}">
-          <a class="answer__item-link row" href="#">
-            <span class="answer__item-name col s8">${result['text']}</span>
-            <span class="secondary-content delete" data-id="${result['id']}" data-name="${result['text']}" data-url="${result['delete_url']}">
-              <i class="material-icons">close</i>
-            </span>
-            <span class="secondary-content edit"><i class="material-icons">edit</i></span>
-            <span class="secondary-content outcome" data-outcome="${result['outcome']}"><i class="material-icons">chevron_right</i></span>
-            <span class="secondary-content append" data-outcome="${result['outcome']}"><i class="material-icons">link</i></span>
-        </a>
-        <form class="answer__item-form hidden row" action="${result['update_url']}" method="put" accept-charset="utf-8">
-            <input placeholder="Название группы" id="name" name="text" type="text" value="${result['text']}" class="validate col s12 group-name">
-          </form>
-        </li>
-      `
+      answer = create_answer(result)
       $('.question-edit-modal-answers').append(answer)
-      incomes = ''
-      for(let one of result['incomes']) {
-        incomes += `
-        <li>
-          <a class="income-item" data-question="${one['question']['id']}" href="${one['question']['url']}" data-id="${one['id']}">${one['text']}</a>
-        </li>
-        `
-      }
-      $('.income-dropdown-list').html(incomes)
+      $('select').formSelect();
     }
   })
 })
@@ -251,10 +308,8 @@ $(document).on('click', '.answer__item .answer__item-link .append', function(eve
   event.preventDefault()
   event.stopPropagation()
 
-  console.log('append')
   answer_outcome_modal = $(this).data('outcome')
   answer_append_modal = $(this).parent().parent().data('id')
-  console.log(answer_outcome_modal)
   $.ajax({
     url: '/api/v1/dialogs/questions/' + group_active + '/',
     type: 'GET',
@@ -311,22 +366,7 @@ $(document).on('click', '.answer__item .answer__item-link .outcome', function(ev
       $('.question-edit-modal').modal('open')
       answers = ''
       for(let one of result['answers']) {
-        answers += `
-        <li class="answer__item collection-item" data-id="${one['id']}">
-          <a class="answer__item-link row" href="#">
-            <span class="answer__item-name col s8">${one['text']}</span>
-            <span class="secondary-content delete" data-id="${one['id']}" data-name="${one['text']}" data-url="${one['delete_url']}">
-              <i class="material-icons">close</i>
-            </span>
-            <span class="secondary-content edit"><i class="material-icons">edit</i></span>
-            <span class="secondary-content outcome" data-outcome="${one['outcome']}"><i class="material-icons">chevron_right</i></span>
-            <span class="secondary-content append" data-outcome="${one['outcome']}"><i class="material-icons">link</i></span>
-        </a>
-        <form class="answer__item-form hidden row" action="${one['update_url']}" method="put" accept-charset="utf-8">
-            <input placeholder="Название группы" id="name" name="text" type="text" value="${one['text']}" class="validate col s12 group-name">
-          </form>
-        </li>
-        `
+        answers += create_answer(one)
       }
       incomes = ''
       for(let one of result['incomes']) {
@@ -338,6 +378,7 @@ $(document).on('click', '.answer__item .answer__item-link .outcome', function(ev
       }
       $('.income-dropdown-list').html(incomes)
       $('.question-edit-modal-answers').html(answers)
+      $('select').formSelect();
     }
   })
 
@@ -359,22 +400,7 @@ $(document).on('click', '.income-item', function(event) {
       $('.question-edit-modal').modal('open')
       answers = ''
       for(let one of result['answers']) {
-        answers += `
-        <li class="answer__item collection-item" data-id="${one['id']}">
-          <a class="answer__item-link row" href="#">
-            <span class="answer__item-name col s8">${one['text']}</span>
-            <span class="secondary-content delete" data-id="${one['id']}" data-name="${one['text']}" data-url="${one['delete_url']}">
-              <i class="material-icons">close</i>
-            </span>
-            <span class="secondary-content edit"><i class="material-icons">edit</i></span>
-            <span class="secondary-content outcome" data-outcome="${one['outcome']}"><i class="material-icons">chevron_right</i></span>
-            <span class="secondary-content append" data-outcome="${one['outcome']}"><i class="material-icons">link</i></span>
-        </a>
-        <form class="answer__item-form hidden row" action="${one['update_url']}" method="put" accept-charset="utf-8">
-            <input placeholder="Название группы" id="name" name="text" type="text" value="${one['text']}" class="validate col s12 group-name">
-          </form>
-        </li>
-        `
+        answers += create_answer(one)
       }
       incomes = ''
       for(let one of result['incomes']) {
@@ -386,6 +412,7 @@ $(document).on('click', '.income-item', function(event) {
       }
       $('.income-dropdown-list').html(incomes)
       $('.question-edit-modal-answers').html(answers)
+      $('select').formSelect();
     }
   })
 
@@ -502,6 +529,7 @@ $(document).ready(function(){
   })
   $('.sidenav').sidenav();
   $('.modal').modal();
+  $('select').formSelect();
   // $('.dropdown-trigger').dropdown();
   var elem = document.querySelector('.dropdown-trigger');
   var options = {

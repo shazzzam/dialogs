@@ -1,3 +1,5 @@
+import random
+
 from rest_framework.generics import (
     ListAPIView,
     RetrieveAPIView,
@@ -96,9 +98,22 @@ class QuestionCreateAPIView(CreateAPIView):
     serializer_class = QuestionSerializer
     permission_classes = [IsAuthenticated, ]
 
+    def create_question(self, question):
+        answer = Answer(
+            text = 'empty',
+            question=question,
+            humanity=random.choice(['-', '0', '0', '+']),
+            curiosity=random.choice(['-', '0', '0', '+']),
+            tyranny=random.choice(['-', '0', '0', '+']),
+            independence=random.choice(['-', '0', '0', '+']),
+        )
+        answer.save()
+
     def perform_create(self, serializer):
         group = Group.objects.get(id=self.kwargs['group_id'])
-        serializer.save(group=group)
+        question = serializer.save(group=group)
+        for one in range(random.randint(2, 6)):
+            self.create_question(question)
 
 
 class AnswerListAPIView(ListAPIView):

@@ -127,6 +127,10 @@ class AnswerSerializer(serializers.ModelSerializer):
             'question',
             'outcome',
             'outcome_obj',
+            'humanity',
+            'curiosity',
+            'tyranny',
+            'independence',
         )
 
     def get_outcome_obj(self, obj):
